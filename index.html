@@ -1,0 +1,789 @@
+<!doctype html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>DeepBlue - منصة تمكين مهني</title>
+  <meta name="description" content="منصة تجريبية بواجهة حقيقية: تشخيص مهارات، خطة تعلم مخصصة، لوحة تحكم، وكورسات." />
+  <style>
+    /* ====== THEME ====== */
+    :root{
+      --deep: #0b4f8a;
+      --mid: #0f77b7;
+      --accent: #ff8a00;
+      --bg: #f6fbff;
+      --card: #ffffff;
+      --muted: #6b7280;
+      --success: #16a34a;
+      --danger: #dc2626;
+      --ink: #07223a;
+      --ring: rgba(15,119,183,.22);
+      font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+    }
+    *{box-sizing:border-box}
+    body{
+      margin:0;
+      background: linear-gradient(180deg,#f7fbff 0%, #eef7ff 100%);
+      color: var(--ink);
+      min-height:100vh;
+      display:flex;
+      align-items:flex-start;
+      justify-content:center;
+      padding:28px;
+    }
+    .container{width:1180px; max-width:98%}
+
+    /* ====== Header / Nav ====== */
+    header{
+      display:flex; align-items:center; justify-content:space-between; gap:12px;
+      margin-bottom:18px;
+    }
+    .brand{display:flex; gap:12px; align-items:center}
+    .logo{width:52px;height:52px;border-radius:10px;
+      background:linear-gradient(135deg,var(--mid),var(--deep));
+      display:flex;align-items:center;justify-content:center;color:white;font-weight:700;font-size:20px;
+      box-shadow: 0 6px 20px rgba(15,77,134,.12);
+      user-select:none
+    }
+    h1{margin:0;font-size:20px}
+
+    .nav{display:flex; align-items:center; gap:8px}
+    .nav-toggle{display:none; border:1px solid rgba(11,79,138,.08); background:#fff; padding:8px 10px; border-radius:8px; cursor:pointer}
+    .nav-links{display:flex; align-items:center; gap:8px}
+
+    .btn{
+      background:var(--deep); color:white; padding:8px 14px;border-radius:8px;border:none; cursor:pointer;
+      font-weight:600; box-shadow: 0 6px 18px rgba(11,79,138,.12); transition: transform .06s ease;
+    }
+    .btn:active{transform: translateY(1px)}
+    .btn.outline{background:transparent;color:var(--deep);border:1px solid rgba(11,79,138,.14)}
+    .btn.ghost{background:transparent;color:var(--mid);border:0}
+
+    .muted{color:var(--muted)}
+    .small{font-size:13px;color:var(--muted)}
+    .center{text-align:center}
+
+    /* ====== Layout ====== */
+    .grid{display:grid; gap:16px; grid-template-columns: 1fr 360px; align-items:start}
+    .card{background:var(--card); border-radius:12px; padding:18px; box-shadow:0 6px 24px rgba(13,71,114,.05)}
+
+    /* ====== Widgets / Parts ====== */
+    .widget-row{display:flex; gap:12px; margin-bottom:12px}
+    .widget{flex:1;padding:12px;border-radius:10px;background:linear-gradient(180deg,#fff,#f3fbff);box-shadow:0 6px 18px rgba(12,68,112,.04)}
+    .progress{height:10px;background:#e6f0fb;border-radius:8px;overflow:hidden}
+    .progress > span{display:block;height:100%;background:linear-gradient(90deg,var(--mid),var(--deep))}
+
+    label{display:block;margin-bottom:6px;font-weight:600}
+    input[type="text"],input[type="email"],select,textarea{
+      width:100%;padding:10px;border-radius:8px;border:1px solid #e6eef8;background:#fbfeff; outline:none;
+    }
+    input:focus, select:focus, textarea:focus{box-shadow:0 0 0 3px var(--ring)}
+    .row{display:flex; gap:12px}
+    .row .col{flex:1}
+
+    .course-item{display:flex;gap:12px;align-items:center;border-radius:10px;padding:10px; border:1px solid #eef4fb}
+    .course-item:hover{background:#f7fbff}
+
+    .pill{background:linear-gradient(90deg,var(--mid),var(--deep));color:white;padding:6px 10px;border-radius:999px;font-weight:700;border:0;cursor:pointer}
+    .pill.selected{box-shadow:0 0 0 3px rgba(255,255,255,.6), 0 0 0 6px rgba(15,119,183,.25)}
+
+    .badge{font-size:12px;padding:6px 10px;border-radius:20px;background:#f1f7ff;color:var(--deep);border:1px solid rgba(15,119,183,.06)}
+    .linkish{color:var(--mid);cursor:pointer;text-decoration:underline}
+
+    .toast{padding:10px;border-radius:10px;background:#e8f7ee;color:var(--success);border:1px dashed rgba(22,163,74,.12);margin-top:8px}
+    .toast.danger{background:#fff1f2;color:var(--danger);border-color: rgba(220,38,38,.18)}
+    #toast-area{position:fixed; top:18px; left:18px; right:18px; display:flex; flex-direction:column; gap:8px; z-index:9999}
+
+    pre{white-space:pre-wrap;background:#0b1728;color:#dff2ff;padding:12px;border-radius:10px}
+
+    footer{margin-top:18px;text-align:center;color:var(--muted);font-size:13px}
+
+    /* Spinner */
+    .spinner{width:28px;height:28px;border-radius:50%; border:3px solid #d9ecff; border-left-color: var(--mid); animation: spin 1s linear infinite; margin:12px auto}
+    @keyframes spin{to{transform:rotate(360deg)}}
+
+    /* Responsive */
+    @media (max-width:980px){ .grid{grid-template-columns:1fr} }
+    @media (max-width:820px){
+      .nav-toggle{display:block}
+      .nav-links{display:none; position:absolute; top:74px; right:20px; left:20px; background:#fff; padding:10px; border-radius:12px; box-shadow:0 12px 26px rgba(0,0,0,.08)}
+      .nav-links.open{display:flex; flex-direction:column; align-items:stretch}
+      .nav-links .btn, .nav-links .btn.outline{width:100%}
+    }
+  </style>
+</head>
+<body>
+  <div class="container" id="app">
+    <div id="toast-area"></div>
+
+    <header>
+      <div class="brand">
+        <div class="logo">DB</div>
+        <div>
+          <h1>DeepBlue</h1>
+          <div class="small">منصة تمكين مهني - تجربة AI مدمجة</div>
+        </div>
+      </div>
+
+      <nav class="nav">
+        <button class="nav-toggle" id="nav-toggle" aria-label="القائمة">☰</button>
+        <div class="nav-links" id="nav-links">
+          <div class="small">مرحبًا، <span id="nav-username">ضيف</span></div>
+          <button class="btn" id="nav-dashboard">لوحة التحكم</button>
+          <button class="btn outline" id="nav-assess">ابدأ التشخيص</button>
+          <button class="btn outline" id="nav-profile">الملف الشخصي</button>
+          <button class="btn outline" id="nav-login">دخول</button>
+          <button class="btn outline" id="nav-logout">خروج</button>
+        </div>
+      </nav>
+    </header>
+
+    <main class="grid">
+      <!-- MAIN COLUMN -->
+      <div>
+        <div id="view-area">
+          <!-- ===== Landing ===== -->
+          <section id="view-landing" class="card">
+            <h2>أهلاً بيك في DeepBlue</h2>
+            <p class="small">ابدأ تشخيص سريع مجاني واكتشف خطة تعلم شخصية خلال دقائق. مناسب للطلبة والخريجين الجدد.</p>
+
+            <div style="margin-top:12px" class="row">
+              <div class="col">
+                <label>الاسم الكامل</label>
+                <input id="input-name" placeholder="اكتب اسمك">
+              </div>
+              <div class="col">
+                <label>البريد الإلكتروني</label>
+                <input id="input-email" placeholder="email@example.com">
+              </div>
+            </div>
+
+            <div style="margin-top:12px" class="row">
+              <div class="col">
+                <label>أنت</label>
+                <select id="select-role">
+                  <option value="student">طالب جامعي</option>
+                  <option value="graduate">خريج جديد</option>
+                  <option value="other">أخرى</option>
+                </select>
+              </div>
+              <div class="col">
+                <label>التخصص / الاهتمام</label>
+                <input id="input-field" placeholder="مثلاً: Biotechnology / Design / Marketing">
+              </div>
+            </div>
+
+            <div style="margin-top:14px;display:flex;gap:10px;align-items:center;flex-wrap:wrap">
+              <button class="btn" id="btn-start-assess">ابدأ التشخيص الآن</button>
+              <button class="btn outline" id="btn-signup">سجّل الآن</button>
+              <div class="small muted">أو <span class="linkish" id="link-login">سجّل دخول</span> لو عندك حساب</div>
+            </div>
+
+            <hr style="margin:18px 0">
+            <h3>لماذا DeepBlue؟</h3>
+            <ul>
+              <li>خطة تعلم مخصصة مدعومة بالذكاء الاصطناعي.</li>
+              <li>ورش عملية ومحاكاة لبيئة العمل.</li>
+              <li>توجيه فردي وفرص تدريب مع شركائنا.</li>
+            </ul>
+          </section>
+
+          <!-- ===== Assessment ===== -->
+          <section id="view-assessment" class="card" style="display:none">
+            <h2>تشخيص سريع للمهارات</h2>
+            <p class="small">اختبار قصير عشان نعرف مستواك ونبني خطة تناسبك.</p>
+
+            <div id="assess-area" style="margin-top:12px">
+              <div id="assess-step" class="card" style="padding:14px">
+                <label>اختَر/ي أهم ثلاث مهارات حابب تطورها الآن</label>
+                <div style="display:flex;gap:8px;flex-wrap:wrap">
+                  <button class="pill btn-outline-skill" data-val="communication">التواصل</button>
+                  <button class="pill btn-outline-skill" data-val="presentation">العرض</button>
+                  <button class="pill btn-outline-skill" data-val="team">العمل الجماعي</button>
+                  <button class="pill btn-outline-skill" data-val="ai-tools">أدوات الذكاء الاصطناعي</button>
+                  <button class="pill btn-outline-skill" data-val="linkedin">LinkedIn</button>
+                  <button class="pill btn-outline-skill" data-val="research">بحث علمي</button>
+                  <button class="pill btn-outline-skill" data-val="lab-skills">مهارات مخبرية</button>
+                </div>
+                <div class="small muted" style="margin-top:8px">اختَر 1–3 مهارات</div>
+                <div style="margin-top:12px"><button class="btn" id="assess-next">التالي</button></div>
+              </div>
+
+              <div id="assess-loading" style="display:none" class="card center">
+                <div class="small muted">جارٍ تحليل إجاباتك... لحظة</div>
+                <div class="spinner"></div>
+                <div class="progress" style="width:80%;margin:auto"><span id="assess-bar" style="width:30%"></span></div>
+              </div>
+
+              <div id="assess-result" style="display:none" class="card">
+                <h3>نتيجة التشخيص</h3>
+                <div id="ai-result-text" class="small"></div>
+                <div style="margin-top:10px">
+                  <h4>خطة التعلم الموصى بها</h4>
+                  <div id="learning-path"></div>
+                </div>
+                <div style="margin-top:12px; display:flex; gap:8px; flex-wrap:wrap">
+                  <button class="btn" id="goto-dashboard">اذهب للوحة التحكم</button>
+                  <button class="btn outline" id="redo-assess">إعادة التشخيص</button>
+                </div>
+              </div>
+            </div>
+          </section>
+
+          <!-- ===== Dashboard ===== -->
+          <section id="view-dashboard" class="card" style="display:none">
+            <div style="display:flex;justify-content:space-between;align-items:center;gap:8px;flex-wrap:wrap">
+              <h2>لوحة التحكم</h2>
+              <div class="small muted">مرحبًا، <strong id="user-greet"></strong></div>
+            </div>
+
+            <div class="widget-row" style="margin-top:12px">
+              <div class="widget">
+                <div class="small muted">تقدم عام</div>
+                <div class="progress" style="margin-top:8px"><span id="progress-bar" style="width:0%"></span></div>
+                <div class="small muted" id="progress-text" style="margin-top:6px">0% مكتمل</div>
+              </div>
+              <div class="widget">
+                <div class="small muted">المهارة المُركّز عليها</div>
+                <div style="margin-top:8px;font-weight:700" id="focus-skill">—</div>
+                <div class="small muted" style="margin-top:6px">تابع خطوة بخطة التعلم</div>
+              </div>
+              <div class="widget">
+                <div class="small muted">فرص قادمة</div>
+                <div style="margin-top:8px">Internship (شراكة محلية)</div>
+                <div class="small muted" style="margin-top:6px">سجّل اهتمامك للحصول على ترشيح</div>
+              </div>
+            </div>
+
+            <div style="margin-top:12px" class="card">
+              <h3>مسارك التعليمي الحالي</h3>
+              <div id="dashboard-path"></div>
+            </div>
+
+            <div style="margin-top:12px" class="card">
+              <h3>كورسات مقترحة</h3>
+              <div class="course-item">
+                <img alt="presentation" src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='60' height='38'%3E%3Crect width='100%25' height='100%25' fill='%23eaf4ff'/%3E%3Ctext x='50%25' y='55%25' text-anchor='middle' font-size='10' fill='%230b4f8a'%3Eslides%3C/text%3E%3C/svg%3E" width="60" height="38" style="border-radius:8px; border:1px solid #eef4fb">
+                <div style="flex:1">
+                  <div style="font-weight:700">Presentation Mastery</div>
+                  <div class="small muted">تحسين مهارات العرض وإعداد الشرائح</div>
+                </div>
+                <div style="text-align:left">
+                  <button class="btn" onclick="openCourse('presentation')">افتح</button>
+                </div>
+              </div>
+
+              <div class="course-item" style="margin-top:8px">
+                <img alt="linkedin" src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='60' height='38'%3E%3Crect width='100%25' height='100%25' fill='%23eaf4ff'/%3E%3Ctext x='50%25' y='55%25' text-anchor='middle' font-size='10' fill='%230b4f8a'%3Ein%3C/text%3E%3C/svg%3E" width="60" height="38" style="border-radius:8px; border:1px solid #eef4fb">
+                <div style="flex:1">
+                  <div style="font-weight:700">LinkedIn & Career</div>
+                  <div class="small muted">بناء بروفايل احترافي والتسويق الذاتي</div>
+                </div>
+                <div style="text-align:left">
+                  <button class="btn" onclick="openCourse('linkedin')">افتح</button>
+                </div>
+              </div>
+            </div>
+          </section>
+
+          <!-- ===== Course Page ===== -->
+          <section id="view-course" class="card" style="display:none">
+            <div style="display:flex;justify-content:space-between;align-items:center;gap:8px;flex-wrap:wrap">
+              <h2 id="course-title">عنوان الكورس</h2>
+              <div><span class="badge" id="course-tag">Skill</span></div>
+            </div>
+            <div style="margin-top:8px" id="course-body"></div>
+          </section>
+
+          <!-- ===== Profile ===== -->
+          <section id="view-profile" class="card" style="display:none">
+            <h2>الملف الشخصي</h2>
+            <div class="small muted">تحكم في معلوماتك واطّلع على تقدمك</div>
+
+            <div style="margin-top:12px" class="row">
+              <div class="col">
+                <label>الاسم</label>
+                <input id="profile-name">
+              </div>
+              <div class="col">
+                <label>الإيميل</label>
+                <input id="profile-email">
+              </div>
+            </div>
+
+            <div style="margin-top:12px">
+              <label>نبذة قصيرة</label>
+              <textarea id="profile-bio" rows="4" placeholder="خبرتك، مجالك، واهدافك"></textarea>
+            </div>
+
+            <div style="margin-top:12px">
+              <button class="btn" id="save-profile">حفظ</button>
+              <div id="profile-msg" class="small muted"></div>
+            </div>
+          </section>
+
+          <!-- ===== Login ===== -->
+          <section id="view-login" class="card" style="display:none">
+            <h2>تسجيل الدخول (تجريبي)</h2>
+            <div class="row">
+              <div class="col"><label>الإيميل</label><input id="login-email" placeholder="you@example.com"></div>
+              <div class="col"><label>الاسم للعرض</label><input id="login-name" placeholder="اسمك"></div>
+            </div>
+            <div style="margin-top:10px; display:flex; gap:8px; flex-wrap:wrap">
+              <button class="btn" id="do-login">دخول</button>
+              <button class="btn outline" id="login-demo">دخول تجريبي فوري</button>
+            </div>
+          </section>
+
+          <!-- ===== About / FAQ (اختياري لتبدو حقيقية) ===== -->
+          <section id="view-about" class="card" style="display:none">
+            <h2>عن DeepBlue</h2>
+            <p class="small">نساعد الطلبة والخريجين على بناء مهارات عملية من خلال تشخيص ذكي وخطط تعلم قصيرة مركّزة.</p>
+          </section>
+
+          <section id="view-faq" class="card" style="display:none">
+            <h2>الأسئلة الشائعة</h2>
+            <details><summary>هل المحتوى مجاني؟</summary><div class="small">نعم هناك محتوى مجاني وخطط مدفوعة لاحقًا.</div></details>
+            <details><summary>هل فيه شهادات إتمام؟</summary><div class="small">نعم، عند إكمال المسارات الأساسية.</div></details>
+          </section>
+        </div>
+      </div>
+
+      <!-- RIGHT COLUMN -->
+      <aside>
+        <div class="card">
+          <h3>Quick Actions</h3>
+          <div style="margin-top:8px; display:flex; gap:8px; flex-wrap:wrap">
+            <button class="btn" id="qa-assess">ابدأ تشخيص</button>
+            <button class="btn outline" id="qa-dashboard">لوحة التحكم</button>
+            <button class="btn outline" id="qa-profile">الملف الشخصي</button>
+          </div>
+        </div>
+
+        <div class="card" style="margin-top:12px">
+          <h4>ماذا تقدم DeepBlue؟</h4>
+          <ul class="small">
+            <li>خطة تعلم مخصصة مدعومة بالـ AI</li>
+            <li>كورسات تطبيقية وورش</li>
+            <li>بودكاست مهني وفرص تدريب</li>
+            <li>Mentorship وCareer Support</li>
+          </ul>
+        </div>
+
+        <div class="card" style="margin-top:12px">
+          <h4>تابعنا</h4>
+          <div style="display:flex;gap:8px;margin-top:8px">
+            <a class="badge" href="#" onclick="addToast('قريبًا… الروابط التجريبية','')">Instagram</a>
+            <a class="badge" href="#" onclick="addToast('قريبًا… الروابط التجريبية','')">LinkedIn</a>
+            <a class="badge" href="#" onclick="addToast('قريبًا… الروابط التجريبية','')">YouTube</a>
+          </div>
+        </div>
+      </aside>
+    </main>
+
+    <footer>
+      DeepBlue © 2025 — Empower. Learn. Lead.
+    </footer>
+  </div>
+
+  <script>
+    /***********************
+     * DeepBlue Prototype JS
+     * Single-file SPA logic + mock AI simulation (جاهز للعمل)
+     ***********************/
+
+    // --------- utilities & state ----------
+    const state = {
+      user: JSON.parse(localStorage.getItem('db_user')||'null'),
+      plan: JSON.parse(localStorage.getItem('db_plan')||'null')
+    };
+
+    const VIEWS = ['view-landing','view-assessment','view-dashboard','view-course','view-profile','view-login','view-about','view-faq'];
+
+    function saveState(){
+      localStorage.setItem('db_user', JSON.stringify(state.user));
+      localStorage.setItem('db_plan', JSON.stringify(state.plan));
+    }
+
+    function $(id){ return document.getElementById(id); }
+
+    function go(view){
+      VIEWS.forEach(v=>$(v).style.display='none');
+      // guards
+      if(view==='dashboard' || view==='profile' || view==='course'){
+        if(!requireAuth()){ return; }
+      }
+      if(view==='dashboard'){ renderDashboard(); }
+      if(view==='course'){ /* body filled elsewhere */ }
+      $(`view-${view}`) ? $(`view-${view}`).style.display='block' : $(view).style.display='block';
+      closeMobileMenu();
+    }
+
+    function requireAuth(){
+      if(!state.user){ addToast('سجّل دخولك أولًا للوصول للوحة التحكم','danger'); go('login'); return false; }
+      return true;
+    }
+
+    // Toasts
+    function addToast(msg,type=''){
+      const wrap = $('toast-area');
+      const el = document.createElement('div');
+      el.className = `toast ${type==='danger'?'danger':''}`;
+      el.textContent = msg;
+      wrap.appendChild(el);
+      setTimeout(()=>{ el.style.opacity='0'; el.style.transition='opacity .4s'; }, 2500);
+      setTimeout(()=>{ wrap.removeChild(el); }, 3000);
+    }
+
+    function closeMobileMenu(){ const nl=$('nav-links'); if(nl.classList.contains('open')) nl.classList.remove('open'); }
+
+    // --------- Init UI ---------
+    function init(){
+      // nav bindings
+      $('nav-toggle').addEventListener('click', ()=> $('nav-links').classList.toggle('open'));
+      $('nav-dashboard').addEventListener('click', ()=>go('dashboard'));
+      $('nav-assess').addEventListener('click', ()=>go('assessment'));
+      $('nav-profile').addEventListener('click', ()=>go('profile'));
+      $('nav-login').addEventListener('click', ()=>go('login'));
+      $('nav-logout').addEventListener('click', logout);
+      $('link-login').addEventListener('click', ()=>go('login'));
+
+      // landing & assessment
+      $('btn-start-assess').addEventListener('click', startFromLanding);
+      $('btn-signup').addEventListener('click', signUpQuick);
+      $('assess-next').addEventListener('click', runAssessment);
+      $('redo-assess').addEventListener('click', ()=>{ $('assess-result').style.display='none'; $('assess-step').style.display='block'; });
+      $('goto-dashboard').addEventListener('click', ()=>go('dashboard'));
+
+      // quick actions
+      $('qa-assess').addEventListener('click', ()=>go('assessment'));
+      $('qa-dashboard').addEventListener('click', ()=>go('dashboard'));
+      $('qa-profile').addEventListener('click', ()=>go('profile'));
+
+      // profile save
+      $('save-profile').addEventListener('click', saveProfile);
+
+      // login buttons
+      $('do-login').addEventListener('click', doLogin);
+      $('login-demo').addEventListener('click', ()=>{ $('login-email').value='demo@deepblue.ai'; $('login-name').value='مستخدم تجريبي'; doLogin(); });
+
+      // skill pills toggling
+      document.querySelectorAll('.btn-outline-skill').forEach(btn=>{
+        btn.addEventListener('click', ()=>{
+          btn.classList.toggle('selected');
+        });
+      });
+
+      // set username in nav
+      syncNav();
+
+      // hash routing quick (optional)
+      window.onhashchange = ()=> { const h = location.hash.replace('#',''); if(h==='dashboard') go('dashboard'); };
+
+      // default view
+      go('landing');
+    }
+
+    function syncNav(){
+      $('nav-username').innerText = state.user ? state.user.name : 'ضيف';
+      // show/hide login-logout
+      $('nav-login').style.display = state.user ? 'none' : 'inline-block';
+      $('nav-logout').style.display = state.user ? 'inline-block' : 'none';
+      $('nav-profile').style.display = state.user ? 'inline-block' : 'none';
+      $('nav-dashboard').style.display = 'inline-block'; // always visible, guarded by requireAuth
+    }
+
+    // ---------- Auth & user ----------
+    function isValidEmail(e){ return /.+@.+\..+/.test(e); }
+
+    function signUpQuick(){
+      const name = $('input-name').value.trim();
+      const email = $('input-email').value.trim();
+      const role = $('select-role').value;
+      const field = $('input-field').value.trim();
+      if(!name || !email || !isValidEmail(email)){ addToast('اكتب اسم وبريد صالحين','danger'); return; }
+      state.user = { name, email, role, field, created: Date.now() };
+      saveState(); syncNav();
+      $('user-greet').innerText = name;
+      addToast('تم التسجيل! هانبدأ التشخيص');
+      go('assessment');
+    }
+
+    function startFromLanding(){
+      const name = $('input-name').value.trim();
+      const email = $('input-email').value.trim();
+      if(name && email && isValidEmail(email) && !state.user){
+        state.user = {name,email,role: $('select-role').value, field:$('input-field').value.trim(), created:Date.now()};
+        saveState(); syncNav();
+      }
+      go('assessment');
+    }
+
+    function doLogin(){
+      const name = ($('login-name').value.trim() || 'ضيف');
+      const email = ($('login-email').value.trim() || 'demo@example.com');
+      if(!isValidEmail(email)){ addToast('البريد غير صالح','danger'); return; }
+      state.user = {name,email,role:'student',created:Date.now()};
+      saveState(); syncNav();
+      $('user-greet').innerText = name;
+      addToast('أهلاً رجعت!');
+      go('dashboard');
+    }
+
+    function logout(){
+      if(confirm('هل تريد تسجيل الخروج؟')){
+        localStorage.removeItem('db_user');
+        localStorage.removeItem('db_plan');
+        state.user=null; state.plan=null; saveState(); syncNav();
+        addToast('تم تسجيل الخروج');
+        go('landing');
+      }
+    }
+
+    // ---------- Assessment / AI flow ----------
+    async function runAssessment(){
+      // collect selected skills
+      const selected = Array.from(document.querySelectorAll('.btn-outline-skill.selected')).map(b=>b.dataset.val);
+      if(selected.length===0){ addToast('اختَر مهارة واحدة على الأقل','danger'); return; }
+      if(selected.length>3){ addToast('اختَر حتى 3 مهارات كحد أقصى','danger'); return; }
+
+      // show loading
+      $('assess-step').style.display='none';
+      $('assess-loading').style.display='block';
+      // fake progress
+      let p=10; const bar=$('assess-bar');
+      const tick=setInterval(()=>{ p=Math.min(95,p+Math.random()*10); bar.style.width=p+'%'; }, 350);
+
+      const result = await mockAI(selected, state.user);
+      clearInterval(tick); bar.style.width='100%';
+
+      $('assess-loading').style.display='none';
+      $('assess-result').style.display='block';
+      $('ai-result-text').innerText = result.summary;
+      renderLearningPath(result.path);
+
+      // persist plan
+      state.plan = {
+        selectedSkills: selected,
+        summary: result.summary,
+        steps: result.path,
+        focusSkill: result.path.length? result.path[0].tag : '—',
+        updated: Date.now()
+      };
+      saveState();
+    }
+
+    function renderLearningPath(path){
+      const host = $('learning-path');
+      host.innerHTML = '';
+      if(!path || !path.length){ host.innerHTML = '<div class="small muted">لا يوجد مسار بعد.</div>'; return; }
+      path.forEach(step=>{
+        const row = document.createElement('div');
+        row.className = 'course-item';
+        row.innerHTML = `
+          <div style="flex:1">
+            <div style="font-weight:700">${step.title}</div>
+            <div class="small muted">${step.desc}</div>
+            <div class="small"><span class="badge">${step.tag}</span> · ${step.duration}</div>
+          </div>
+          <div style="display:flex; gap:6px; align-items:center">
+            <button class="btn outline" data-go="${step.link||''}">افتح</button>
+          </div>`;
+        row.querySelector('button').addEventListener('click', ()=>{
+          if(step.link){ openCourse(step.link); } else { addToast('يتم تجهيز المحتوى…'); }
+        });
+        host.appendChild(row);
+      });
+    }
+
+    function renderDashboard(){
+      if(!state.user){ return; }
+      $('user-greet').innerText = state.user.name;
+
+      if(!state.plan){
+        $('dashboard-path').innerHTML = '<div class="small muted">لا توجد خطة بعد. ابدأ التشخيص أولاً.</div>';
+        $('focus-skill').innerText = '—';
+        $('progress-bar').style.width = '0%';
+        $('progress-text').innerText = '0% مكتمل';
+        return;
+      }
+
+      // path list with checkboxes
+      const wrap = document.createElement('div');
+      state.plan.steps.forEach((s, idx)=>{
+        const row = document.createElement('div');
+        row.className='course-item';
+        row.innerHTML = `
+          <input type="checkbox" ${s.done?'checked':''} data-idx="${idx}" style="width:18px;height:18px">
+          <div style="flex:1">
+            <div style="font-weight:700">${s.title}</div>
+            <div class="small muted">${s.desc}</div>
+            <div class="small"><span class="badge">${s.tag}</span> · ${s.duration}</div>
+          </div>
+          <button class="btn outline" data-open="${s.link||''}">افتح</button>`;
+        row.querySelector('input').addEventListener('change', (e)=>{
+          const i = Number(e.target.getAttribute('data-idx'));
+          state.plan.steps[i].done = e.target.checked;
+          saveState(); updateProgress();
+        });
+        row.querySelector('button').addEventListener('click', ()=>{ if(s.link) openCourse(s.link); else addToast('قريبًا'); });
+        wrap.appendChild(row);
+      });
+      const host = $('dashboard-path');
+      host.innerHTML=''; host.appendChild(wrap);
+
+      $('focus-skill').innerText = state.plan.focusSkill || '—';
+      updateProgress();
+    }
+
+    function updateProgress(){
+      if(!state.plan){ $('progress-bar').style.width='0%'; $('progress-text').innerText='0% مكتمل'; return; }
+      const total = state.plan.steps.length || 1;
+      const done = state.plan.steps.filter(s=>s.done).length;
+      const pct = Math.round((done/total)*100);
+      $('progress-bar').style.width = pct+'%';
+      $('progress-text').innerText = pct+'% مكتمل';
+    }
+
+    // ---------- Course Pages ----------
+    function openCourse(id){
+      const meta = getCourseMeta(id);
+      $('course-title').innerText = meta.title;
+      $('course-tag').innerText = meta.tag;
+      $('course-body').innerHTML = meta.html;
+      go('course');
+    }
+
+    function getCourseMeta(id){
+      const blocks = {
+        presentation: {
+          title: 'Presentation Mastery', tag: 'Presentation',
+          html: `
+            <p class="small">هدف الكورس: تقدم عرض متماسك خلال 7 أيام.</p>
+            <ol>
+              <li><strong>Story First:</strong> حدد الرسالة الأساسية (جملة واحدة).</li>
+              <li><strong>Slide Design 101:</strong> قاعدة 1 فكرة/شريحة. تباين قوي. مساحة بيضاء.</li>
+              <li><strong>Visuals:</strong> استخدم صور بسيطة ورسوم بيانية واضحة.</li>
+              <li><strong>Delivery:</strong> بروفة 3 مرات (تسجيل فيديو قصير للتقييم الذاتي).</li>
+            </ol>
+            <div class="card" style="margin-top:10px">
+              <h4>قوالب سريعة</h4>
+              <pre>عنوان: المشكلة → الرؤية → الخطة → الخطوة التالية</pre>
+              <button class="btn" onclick="addToast('تم نسخ القالب')">انسخ القالب</button>
+            </div>
+          `
+        },
+        linkedin: {
+          title:'LinkedIn & Career', tag:'Career',
+          html:`
+            <p class="small">ابنِ بروفايل يجيب مقابلات خلال أسبوع.</p>
+            <ul>
+              <li>عنوان احترافي: الدور المستهدف + قيمة مضافة.</li>
+              <li>About موجزة من 3 فقرات (أنا – إنجاز – هدفي).</li>
+              <li>نتائج ملموسة في الخبرات (أرقام/أثر).</li>
+              <li>روتين أسبوعي: تواصل مع 5 مختصين + منشور واحد.</li>
+            </ul>
+            <div class="card" style="margin-top:10px">
+              <h4>Checklist</h4>
+              <ul class="small"><li>صورة وبانر واضح</li><li>روابط أعمالك</li><li>كلمات مفتاحية صحيحة</li></ul>
+            </div>
+          `
+        },
+        'ai-tools': {
+          title:'Prompting Essentials', tag:'AI',
+          html:`
+            <p class="small">مبادئ كتابة الـ Prompt وأتمتة مهام صغيرة.</p>
+            <ol>
+              <li>هيكل: دور النظام → الهدف → السياق → القيود → المخرجات المتوقعة.</li>
+              <li>Build → Test → Refine: عدّل جملة بجملة.</li>
+              <li>أخلاقيات الاستخدام وسلامة البيانات.</li>
+            </ol>
+          `
+        }
+      };
+      return blocks[id] || { title:'Course', tag:'Skill', html:'<p class="small">قريبًا…</p>'};
+    }
+
+    // ---------- Profile ----------
+    function saveProfile(){
+      if(!state.user){ addToast('سجّل دخولك أولًا','danger'); return; }
+      state.user.name = $('profile-name').value.trim() || state.user.name;
+      state.user.email = $('profile-email').value.trim() || state.user.email;
+      state.user.bio = $('profile-bio').value.trim();
+      saveState(); syncNav();
+      $('user-greet').innerText = state.user.name;
+      $('profile-msg').textContent = 'تم الحفظ';
+      addToast('تم حفظ الملف الشخصي');
+    }
+
+    function loadProfile(){
+      if(!state.user) return;
+      $('profile-name').value = state.user.name || '';
+      $('profile-email').value = state.user.email || '';
+      $('profile-bio').value = state.user.bio || '';
+    }
+
+    // ---------- Mock AI ----------
+    function mockAI(selected, user){
+      return new Promise(res=>{
+        setTimeout(()=>{
+          const skillMap = {
+            communication:[
+              {title:'أساسيات التواصل', desc:'مبادئ الرسائل الواضحة وCTA', duration:'2h', tag:'Communication'},
+              {title:'الاستماع الفعّال', desc:'أسئلة مفتوحة ولُب الرد', duration:'2h', tag:'Communication'}
+            ],
+            presentation:[
+              {title:'تصميم الشرائح', desc:'قاعدة 1 فكرة/شريحة + تباين', duration:'3h', tag:'Presentation', link:'presentation'},
+              {title:'رواية القصة', desc:'هيكل عرض: مشكلة→حل→أثر', duration:'2h', tag:'Presentation'}
+            ],
+            team:[
+              {title:'ديناميكيات الفرق', desc:'أدوار الفريق وقواعد العمل', duration:'2h', tag:'Team'},
+              {title:'أساسيات Agile', desc:'كانبان / ستاند أب يومي', duration:'2h', tag:'Team'}
+            ],
+            'ai-tools':[
+              {title:'Prompting 101', desc:'هيكلة الطلبات وتجارب سريعة', duration:'2h', tag:'AI', link:'ai-tools'},
+              {title:'أتمتة صغيرة', desc:'テンplate للمهام المتكررة', duration:'1.5h', tag:'AI'}
+            ],
+            linkedin:[
+              {title:'تحسين البروفايل', desc:'عنوان – About – كلمات مفتاحية', duration:'2h', tag:'Career', link:'linkedin'},
+              {title:'شبكات فعّالة', desc:'رسائل تواصل مهذّبة وقصيرة', duration:'1.5h', tag:'Career'}
+            ],
+            research:[
+              {title:'Literature Review', desc:'من أين تبدأ وكيف تدوّن المراجع', duration:'3h', tag:'Research'},
+              {title:'Academic Writing', desc:'IMRaD ومهارات التلخيص', duration:'3h', tag:'Research'}
+            ],
+            'lab-skills':[
+              {title:'سلامة معملية', desc:'PPE والتعامل مع النفايات', duration:'2h', tag:'Lab'},
+              {title:'Pipetting & QC', desc:'دقة القياس والمعايرة', duration:'2h', tag:'Lab'}
+            ]
+          };
+
+          // Build path: بحد أقصى 6 خطوات (2 لكل مهارة مختارة)
+          let path=[]; selected.forEach(sk=>{ path = path.concat(skillMap[sk]||[]); });
+          path = path.slice(0,6).map((s,i)=>({ id:'step-'+i, done:false, ...s }));
+
+          const focus = selected[0] || 'Skill';
+          const name = (user && user.name) ? user.name : 'صديقي';
+          const summary = `يا ${name}، ركّزنا على ${selected.map(arabicName).join(' + ')}. هنمشي بخطوات قصيرة، كل خطوة لها هدف واضح وزمن معروف. بعد إتمام المسار هتكون جاهز/ة لتطبيق مهاراتك مباشرة.`;
+
+          res({summary, path, focus});
+        }, 900);
+      });
+    }
+
+    function arabicName(code){
+      const m = { 'communication':'التواصل','presentation':'العرض','team':'العمل الجماعي','ai-tools':'أدوات الذكاء الاصطناعي','linkedin':'LinkedIn','research':'البحث العلمي','lab-skills':'المهارات المخبرية' };
+      return m[code]||code;
+    }
+
+    // --------- Start ---------
+    document.addEventListener('DOMContentLoaded', ()=>{
+      init();
+      if(state.user){ $('user-greet').innerText = state.user.name; }
+      // Load profile when opening profile view
+      const obs = new MutationObserver(()=>{ if($('#view-profile') && $('#view-profile').style.display==='block') loadProfile(); });
+      obs.observe($('app'), {subtree:true, attributes:true});
+    });
+  </script>
+</body>
+</html>
